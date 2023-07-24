@@ -19,7 +19,7 @@ def create_transformation_matrix(a):
     transformation_matrix = np.zeros((n, n))
     for i in range(n):
         for j in range(n):
-            transformation_matrix[i, j] = alpha[i] * np.cos((math.pi * (2 * j + 1) * i) / (2 * n))
+            transformation_matrix[i, j] = alpha[i] * np.cos((i * math.pi * (2 * j + 1)) / (2 * n))
     
     return transformation_matrix
 
@@ -35,9 +35,10 @@ def dct_created(input_vector):
 
 
 # Esempio di utilizzo:
-a = np.array([1, 2, 3, 4])
+a = np.array([231, 32, 233, 161, 24, 71, 140, 245])
 
 # DEBUG: print (transformation_matrix)
 
 dct = dct_created(a)
-print (dct)
+formatted_dct = ["{:.2e}".format(val) for val in dct]
+print(formatted_dct)
