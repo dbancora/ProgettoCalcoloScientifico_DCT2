@@ -1,7 +1,6 @@
 import numpy as np
 import math
 
-
 # Funzione per la creazione della matrice di trasformazione
 def create_transformation_matrix(a):
     # Calcolo della lunghezza dell'array
@@ -24,7 +23,21 @@ def create_transformation_matrix(a):
     
     return transformation_matrix
 
+# Funzione per DCT creata 
+def dct_created(input_vector):
+    # Creazione della matrice di trasformazione
+    transformation_matrix = create_transformation_matrix(input_vector)
+
+    # Calcolo del risultato (c) come la moltiplizazione tra la matrice di trasformazione con il vettore dato in input (f)
+    dct_result = np.dot(transformation_matrix, input_vector)
+    
+    return dct_result
+
+
 # Esempio di utilizzo:
 a = np.array([1, 2, 3, 4])
-transformation_matrix = create_transformation_matrix(a)
+
 # DEBUG: print (transformation_matrix)
+
+dct = dct_created(a)
+print (dct)
