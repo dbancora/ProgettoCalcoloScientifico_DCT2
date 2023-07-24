@@ -33,6 +33,23 @@ def dct_created(input_vector):
     
     return dct_result
 
+# Funzione per DCT2 creata
+def dct2_created(input_matrix):
+    
+    m, n = input_matrix.shape
+
+    # Crezione della matrice 
+    dct2_result = np.zeros((m, n))
+
+    # DCT per ogni riga
+    for i in range(m):
+        dct2_result[i, :] = dct_created(input_matrix[i, :])
+
+    # DCT per ogni colonna
+    for j in range(n):
+        dct2_result[:, j] = dct_created(dct2_result[:, j])
+
+    return dct2_result
 
 # Esempio di utilizzo:
 a = np.array([231, 32, 233, 161, 24, 71, 140, 245])
@@ -42,3 +59,15 @@ a = np.array([231, 32, 233, 161, 24, 71, 140, 245])
 dct = dct_created(a)
 formatted_dct = ["{:.2e}".format(val) for val in dct]
 print(formatted_dct)
+
+
+input_matrix = np.array([[231, 32, 233, 161, 24, 71, 140, 245], 
+                         [247, 40, 248, 245, 124, 204, 36, 107], 
+                         [234, 202, 245, 167, 9, 217, 239, 173],
+                         [193, 190, 100, 167, 43, 180, 8, 70],
+                         [11, 24, 210, 177, 81, 243, 8, 112],
+                         [97, 195, 203, 47, 125, 114, 165, 181],
+                         [193, 70, 174, 167, 41, 30, 127, 245],
+                         [87, 149, 57, 192, 65, 129, 178, 228]])
+dct2_result = dct2_created(input_matrix)
+print(dct2_result)
