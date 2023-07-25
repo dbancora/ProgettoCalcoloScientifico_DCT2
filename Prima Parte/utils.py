@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from scipy.fft import dct
 
 # Funzione per la creazione della matrice di trasformazione
 def create_transformation_matrix(a):
@@ -51,3 +52,11 @@ def dct2_created(input_matrix):
         dct2_result[:, j] = dct_created(dct2_result[:, j])
 
     return dct2_result
+
+# Funzione DCT implementata da libreria esterna
+def dct_library(f):
+    return dct(f.T, norm='ortho')
+
+# Funzione DCT2 implementata da libreria esterna
+def dct2_library(f):
+    return dct(dct(f.T, norm='ortho').T, norm='ortho')
