@@ -6,4 +6,5 @@ All'interno del progetto, è stata implementata la **DCT2** di _SciPy_ in versio
 
 All'interno della cartella è possibile trovare anche un grafico che confronota i tempi di esecuzione della DCT2 implementata da noi (con le formule viste a lezione) e la DCT2 disponibile all'intenro del package _fft_ di scipy, implementata in versione fast.
 
+il linguaggio utilizzato è _python_. 
  ## Seconda parte
