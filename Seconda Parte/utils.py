@@ -3,11 +3,26 @@ from tkinter import filedialog, messagebox
 import tkinter.font as tkFont
 from tkinter import ttk
 from PIL import Image
+import numpy as np
+from scipy.fftpack import dct, idct
 
 # Dichiarazione delle variabili globali
 global label_path, entry_variable_f, entry_variable_d, file_path
 
 file_path = None
+
+def flow():
+
+    F, d, image_path = check_variables()
+    blocks = divide_image_into_blocks(image_path, F) 
+    blocks_dct_quantized = apply_dct2(blocks, d)   
+
+    for i, block_dct_quantized in enumerate(blocks_dct_quantized[:3]):
+        print(f"Risultati della DCT2 quantizzata per blocco {i + 1}:\n{block_dct_quantized}\n")
+    
+    blocks_idct_rounded = apply_idct2(blocks_dct_quantized)
+    save_compressed_image(blocks_idct_rounded)
+    
 
 def browse_file():
     global file_path
@@ -18,7 +33,7 @@ def browse_file():
         label_path.config(text="Nessun file selezionato")
 
 def check_variables():    
-    global entry_variable_f, entry_variable_d, file_path, F
+    global entry_variable_f, entry_variable_d, F
     
     # Recupera i valori di F e d dalla label
     F = entry_variable_f.get()
@@ -79,10 +94,8 @@ def check_variables():
 
     # If all checks pass, proceed with compression
     print("All test are ok.")
-
-    divide_image_into_blocks(file_path, F)
-
-    return True
+    
+    return F, d, file_path
 
 def create_first_interface():
     global label_path, entry_variable_f, entry_variable_d
@@ -120,18 +133,86 @@ def create_first_interface():
     entry_variable_d = tk.Entry(root, font=custom_font)
     entry_variable_d.pack(pady=5)
 
-    save_button = ttk.Button(root, text="Salva F e d", command=check_variables, style="Material.TButton")
+    save_button = ttk.Button(root, text="Salva F e d", command=flow, style="Material.TButton")
     save_button.pack(pady=5)
     
     # Aggiungiamo il pulsante "Compress"
-    compress_button = ttk.Button(root, text="Compress", command=check_variables, style="Material.TButton")
+    compress_button = ttk.Button(root, text="Compress", command=flow, style="Material.TButton")
     compress_button.pack(pady=5)
 
     root.mainloop()
 
-def divide_image_into_blocks(file_path, F):
+def apply_dct2(blocks, d):
+    # Lista per salvare i blocchi DCT2 quantizzati
+    blocks_dct_quantized = []
+
+    # Iteriamo su tutti i blocchi e applichiamo la DCT2
+    for block in blocks:
+        # Convertiamo il blocco in un array NumPy
+        block_array = np.array(block)
+
+        # Applichiamo la DCT2 al blocco usando scipy
+        block_dct = dct(dct(block_array.T, norm='ortho').T, norm='ortho')
+
+        # Quantizzazione: Eliminiamo le frequenze con indice di riga + indice di colonna >= d
+        block_dct_quantized = block_dct * (np.abs(np.add.outer(range(F), range(F))) < d)
+
+        # Aggiungiamo il blocco DCT2 quantizzato alla lista
+        blocks_dct_quantized.append(block_dct_quantized)
+
+    return blocks_dct_quantized
+
+def apply_idct2(blocks_dct_quantized):
+    # Lista per salvare i blocchi IDCT2 quantizzati e arrotondati
+    blocks_idct_rounded = []
+
+    # Iteriamo su tutti i blocchi quantizzati e applichiamo la IDCT2
+    for block_dct_quantized in blocks_dct_quantized:
+        # Applichiamo la IDCT2 al blocco usando scipy
+        block_idct = idct(idct(block_dct_quantized.T, norm='ortho').T, norm='ortho')
+
+        # Arrotondiamo i valori della matrice IDCT2 al valore intero più vicino
+        block_idct_rounded = np.round(block_idct)
+
+        # Impostiamo a 0 i valori negativi
+        block_idct_rounded[block_idct_rounded < 0] = 0
+
+        # Impostiamo a 255 i valori maggiori di 255
+        block_idct_rounded[block_idct_rounded > 255] = 255
+
+        # Convertiamo la matrice risultante in un array di interi non segnati a 1 byte
+        block_idct_rounded = block_idct_rounded.astype(np.uint8)
+
+        # Aggiungiamo il blocco IDCT2 arrotondato e quantizzato alla lista
+        blocks_idct_rounded.append(block_idct_rounded)
+
+    return blocks_idct_rounded
+
+def save_compressed_image(blocks_idct_rounded):
     try:
-        with Image.open(file_path) as img:
+        # Ricomponi l'immagine compressa utilizzando i blocchi compressi
+        img_width, img_height = Image.open(file_path).size
+        compressed_image = Image.new('L', (img_width, img_height))
+
+        F = entry_variable_f.get()
+        num_blocks_horizontal = img_width // int(F)
+
+        for j in range(img_height // int(F)):
+            for i in range(num_blocks_horizontal):
+                x0 = i * int(F)
+                y0 = j * int(F)
+                block = blocks_idct_rounded.pop(0)
+                compressed_image.paste(Image.fromarray(block), (x0, y0))
+
+        # Salva l'immagine compressa nel formato .bmp
+        compressed_image.save("compressed_image.bmp")
+        print("Immagine compressa salvata con successo.")
+    except Exception as e:
+        print("Errore durante il salvataggio dell'immagine compressa:", str(e))
+
+def divide_image_into_blocks(image_path, F):
+    try:
+        with Image.open(image_path) as img:
             img_width, img_height = img.size
 
             # Calcoliamo il numero di blocchi in orizzontale e verticale
@@ -152,14 +233,16 @@ def divide_image_into_blocks(file_path, F):
                     # Estraiamo il blocco corrente dall'immagine
                     block = img.crop((x0, y0, x1, y1))
                     blocks.append(block)
-
+            '''
             for i, block in enumerate(blocks):
                 print(f"Stampa blocco {i + 1}")
                 block.show()
-
+            '''
+            return blocks
+        
     except Exception as e:
         print("Errore durante l'elaborazione dell'immagine:", str(e))
-        return True
+        return blocks
     
 
 # per verificare se i valori F e d sono interi
