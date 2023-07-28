@@ -21,14 +21,22 @@ def flow():
         print(f"Risultati della DCT2 quantizzata per blocco {i + 1}:\n{block_dct_quantized}\n")
     
     blocks_idct_rounded = apply_idct2(blocks_dct_quantized)
-    save_compressed_image(blocks_idct_rounded)
-    
+    save_compressed_image(blocks_idct_rounded)    
 
 def browse_file():
     global file_path
     file_path = filedialog.askopenfilename(filetypes=[("Bitmap files", "*.bmp")])
     if file_path:
         label_path.config(text="File selezionato: " + file_path)
+        
+        # Carichiamo l'immagine, la convertiamo in scala di grigi e calcoliamo le dimensioni 
+        img = Image.open(file_path).convert('L')
+        img_width, img_height = img.size
+        img.close()
+
+        # Aggiorna la label con il testo che include il percorso dell'immagine e le dimensioni
+        label_path.config(text=f"File selezionato: {file_path}\nDimensioni immagine: {img_width}x{img_height}")
+
     else:
         label_path.config(text="Nessun file selezionato")
 
@@ -132,9 +140,6 @@ def create_first_interface():
 
     entry_variable_d = tk.Entry(root, font=custom_font)
     entry_variable_d.pack(pady=5)
-
-    save_button = ttk.Button(root, text="Salva F e d", command=flow, style="Material.TButton")
-    save_button.pack(pady=5)
     
     # Aggiungiamo il pulsante "Compress"
     compress_button = ttk.Button(root, text="Compress", command=flow, style="Material.TButton")
@@ -215,6 +220,9 @@ def divide_image_into_blocks(image_path, F):
         with Image.open(image_path) as img:
             img_width, img_height = img.size
 
+            # Converti l'immagine in scala di grigi
+            img_gray = img.convert('L')
+
             # Calcoliamo il numero di blocchi in orizzontale e verticale
             num_blocks_horizontal = img_width // F
             num_blocks_vertical = img_height // F
@@ -231,7 +239,7 @@ def divide_image_into_blocks(image_path, F):
                     y1 = y0 + F
 
                     # Estraiamo il blocco corrente dall'immagine
-                    block = img.crop((x0, y0, x1, y1))
+                    block = img_gray.crop((x0, y0, x1, y1))
                     blocks.append(block)
             '''
             for i, block in enumerate(blocks):
@@ -243,7 +251,6 @@ def divide_image_into_blocks(image_path, F):
     except Exception as e:
         print("Errore durante l'elaborazione dell'immagine:", str(e))
         return blocks
-    
 
 # per verificare se i valori F e d sono interi
 def is_integer(value):
