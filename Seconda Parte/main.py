@@ -1,3 +1,3 @@
 import utils
 
-utils.create_interface()
+utils.create_first_interface()

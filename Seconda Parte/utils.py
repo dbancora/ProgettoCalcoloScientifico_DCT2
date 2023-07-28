@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import tkinter.font as tkFont
 from tkinter import ttk
+from PIL import Image
 
 # Dichiarazione delle variabili globali
 global label_path, entry_variable_f, entry_variable_d, file_path
@@ -16,8 +17,8 @@ def browse_file():
     else:
         label_path.config(text="Nessun file selezionato")
 
-def save_variables():
-    global entry_variable_f, entry_variable_d, file_path
+def check_variables():    
+    global entry_variable_f, entry_variable_d, file_path, F
     
     # Recupera i valori di F e d dalla label
     F = entry_variable_f.get()
@@ -54,12 +55,36 @@ def save_variables():
         messagebox.showerror("Errore", "d deve essere maggiore o uguale a 0")
         return
 
-    # If all checks pass, proceed with compression
-    print("Variabile F:", F)
-    print("Variabile d:", d)
-    print("Compressing...")
+    # Verifichiamo ora che il valore di F non sia superiore all'altezza/larghezza dell'immagine
+    try:
+        with Image.open(file_path) as img:
+            img_width, img_height = img.size
 
-def create_interface():
+        if F > img_width or F > img_height:
+            messagebox.showerror("Errore", "Il valore di F non può superare le dimensioni dell'immagine.")
+            return
+
+        # Stampa debug delle dimensioni dell'immagine selezionata
+        print("Image Width:", img_width)
+        print("Image Height:", img_height)
+
+    except Exception as e:
+        messagebox.showerror("Errore", f"Errore durante il recupero delle dimensioni dell'immagine: {str(e)}")
+        return
+    
+    # verifichiamo che il valore di d sia compreso tra 0 e 2F-2
+    if d > 2*F - 2 or d < 0:
+        messagebox.showerror("Errore", "Il valore di d deve essere compreso tra 0 e 2F-2.")
+        return
+
+    # If all checks pass, proceed with compression
+    print("All test are ok.")
+
+    divide_image_into_blocks(file_path, F)
+
+    return True
+
+def create_first_interface():
     global label_path, entry_variable_f, entry_variable_d
 
     root = tk.Tk()
@@ -95,19 +120,57 @@ def create_interface():
     entry_variable_d = tk.Entry(root, font=custom_font)
     entry_variable_d.pack(pady=5)
 
-    save_button = ttk.Button(root, text="Salva F e d", command=save_variables, style="Material.TButton")
+    save_button = ttk.Button(root, text="Salva F e d", command=check_variables, style="Material.TButton")
     save_button.pack(pady=5)
-
+    
     # Aggiungiamo il pulsante "Compress"
-    compress_button = ttk.Button(root, text="Compress", command=save_variables, style="Material.TButton")
+    compress_button = ttk.Button(root, text="Compress", command=check_variables, style="Material.TButton")
     compress_button.pack(pady=5)
 
     root.mainloop()
 
+def divide_image_into_blocks(file_path, F):
+    try:
+        with Image.open(file_path) as img:
+            img_width, img_height = img.size
 
+            # Calcoliamo il numero di blocchi in orizzontale e verticale
+            num_blocks_horizontal = img_width // F
+            num_blocks_vertical = img_height // F
+
+            blocks = []
+
+            # Iteriamo su tutti i blocchi
+            for j in range(num_blocks_vertical):
+                for i in range(num_blocks_horizontal):
+                    # Calcoliamo le coordinate iniziali e finali del blocco corrente
+                    x0 = i * F
+                    y0 = j * F
+                    x1 = x0 + F
+                    y1 = y0 + F
+
+                    # Estraiamo il blocco corrente dall'immagine
+                    block = img.crop((x0, y0, x1, y1))
+                    blocks.append(block)
+
+            for i, block in enumerate(blocks):
+                print(f"Stampa blocco {i + 1}")
+                block.show()
+
+    except Exception as e:
+        print("Errore durante l'elaborazione dell'immagine:", str(e))
+        return True
+    
+
+# per verificare se i valori F e d sono interi
 def is_integer(value):
     try:
         int(value)
         return True
     except ValueError:
         return False
+
+def print_blocks(blocks):
+    for i, block in enumerate(blocks):
+        print(f"Stampa blocco {i + 1}")
+        block.show()
