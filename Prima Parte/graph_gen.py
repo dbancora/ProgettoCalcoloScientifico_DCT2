@@ -19,6 +19,6 @@ def plot_dct_times(times_scipy_dct, times_my_dct, matrix_dimensions):
     plt.grid(True)
 
     # Salva l'immagine del grafico
-    plt.savefig('grafico_dct_times.png')
+    plt.savefig('Prima Parte/grafico_dct_times.png')
 
     plt.show()

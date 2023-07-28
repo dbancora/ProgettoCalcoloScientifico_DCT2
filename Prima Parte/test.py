@@ -39,7 +39,7 @@ def run_test():
 
 def test_N(): 
     # Dimensioni delle matrici NxN (da 50 a 900 con passo 50)
-    matrix_dimensions = list(range(50, 751, 50))
+    matrix_dimensions = list(range(50, 951, 50))
 
     times_scipy_dct = []
     times_my_dct = []
