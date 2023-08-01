@@ -5,6 +5,8 @@ from tkinter import ttk
 from PIL import Image
 import numpy as np
 from scipy.fftpack import dct, idct
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Dichiarazione delle variabili globali
 global label_path, entry_variable_f, entry_variable_d, file_path
@@ -22,6 +24,9 @@ def flow():
     
     blocks_idct_rounded = apply_idct2(blocks_dct_quantized)
     save_compressed_image(blocks_idct_rounded)    
+    
+    # Visualizza le immagini originale e compressa
+    show_images(Image.open(file_path).convert('L'), Image.open("compressed_image.bmp"))
 
 def browse_file():
     global file_path
@@ -39,6 +44,31 @@ def browse_file():
 
     else:
         label_path.config(text="Nessun file selezionato")
+
+def show_images(original_image, compressed_image):
+    root = tk.Tk()
+    root.title("Immagine originale e compressa")
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+
+    # Immagine originale
+    ax1.imshow(original_image, cmap="gray")
+    ax1.set_title("Immagine Originale")
+    ax1.axis("off")
+
+    # Immagine compressa
+    ax2.imshow(compressed_image, cmap="gray")
+    ax2.set_title("Immagine Compressa")
+    ax2.axis("off")
+
+    # Crea la figura in un oggetto FigureCanvasTkAgg
+    canvas = FigureCanvasTkAgg(fig, master=root)
+    canvas.draw()
+
+    # Mostra il canvas nella finestra
+    canvas.get_tk_widget().pack()
+
+    root.mainloop()
 
 def check_variables():    
     global entry_variable_f, entry_variable_d, F
