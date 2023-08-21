@@ -7,6 +7,7 @@ import numpy as np
 from scipy.fftpack import dct, idct
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import os
 
 # Dichiarazione delle variabili globali
 global label_path, entry_variable_f, entry_variable_d, file_path
@@ -14,7 +15,6 @@ global label_path, entry_variable_f, entry_variable_d, file_path
 file_path = None
 
 def flow():
-
     F, d, image_path = check_variables()
     blocks = divide_image_into_blocks(image_path, F) 
     blocks_dct_quantized = apply_dct2(blocks, d)   
@@ -23,10 +23,11 @@ def flow():
         print(f"Risultati della DCT2 quantizzata per blocco {i + 1}:\n{block_dct_quantized}\n")
     
     blocks_idct_rounded = apply_idct2(blocks_dct_quantized)
-    save_compressed_image(blocks_idct_rounded)    
+    save_compressed_image(blocks_idct_rounded)        
     
     # Visualizza le immagini originale e compressa
     show_images(Image.open(file_path).convert('L'), Image.open("compressed_image.bmp"))
+        
 
 def browse_file():
     global file_path
@@ -46,6 +47,14 @@ def browse_file():
         label_path.config(text="Nessun file selezionato")
 
 def show_images(original_image, compressed_image):
+    def on_closing():  
+        print("on closing...")    
+        original_image.close()
+        compressed_image.close()    
+    
+        root.destroy()  # Chiudi la finestra principale
+
+
     root = tk.Tk()
     root.title("Immagine originale e compressa")
 
@@ -68,10 +77,25 @@ def show_images(original_image, compressed_image):
     # Mostra il canvas nella finestra
     canvas.get_tk_widget().pack()
 
+    # Imposta l'azione di chiusura sulla finestra principale
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+
     root.mainloop()
+
+    
 
 def check_variables():    
     global entry_variable_f, entry_variable_d, F
+
+    compressed_image_path = "compressed_image.bmp"
+
+    try: 
+        # Verifica se esiste già un file "compressed_image.bmp"
+        if os.path.exists(compressed_image_path):
+            os.remove(compressed_image_path)  # Rimuovi il file esistente
+            print("Rimossa l'immagine")
+    except Exception as e:
+        print("Errore durante la rimozione dell'immagine compressa:", str(e))
     
     # Recupera i valori di F e d dalla label
     F = entry_variable_f.get()
@@ -224,7 +248,17 @@ def apply_idct2(blocks_dct_quantized):
     return blocks_idct_rounded
 
 def save_compressed_image(blocks_idct_rounded):
-    try:
+
+    compressed_image_path = "compressed_image.bmp" 
+    compressed_image = None
+
+    # Verifica se esiste già un file "compressed_image.bmp"
+    if os.path.exists(compressed_image_path):
+        os.remove(compressed_image_path)  # Rimuovi il file esistente
+        print("Rimossa l'immagine")
+
+    try:        
+
         # Ricomponi l'immagine compressa utilizzando i blocchi compressi
         img_width, img_height = Image.open(file_path).size
         compressed_image = Image.new('L', (img_width, img_height))
@@ -237,10 +271,12 @@ def save_compressed_image(blocks_idct_rounded):
                 x0 = i * int(F)
                 y0 = j * int(F)
                 block = blocks_idct_rounded.pop(0)
-                compressed_image.paste(Image.fromarray(block), (x0, y0))
+                compressed_image.paste(Image.fromarray(block), (x0, y0))          
 
         # Salva l'immagine compressa nel formato .bmp
-        compressed_image.save("compressed_image.bmp")
+        compressed_image.save(compressed_image_path) 
+        compressed_image.close()       
+
         print("Immagine compressa salvata con successo.")
     except Exception as e:
         print("Errore durante il salvataggio dell'immagine compressa:", str(e))
