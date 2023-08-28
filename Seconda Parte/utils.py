@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import tkinter.font as tkFont
 from tkinter import ttk
+from ttkthemes import ThemedStyle
 from PIL import Image
 import numpy as np
 from scipy.fftpack import dct, idct
@@ -41,7 +42,7 @@ def browse_file():
         img.close()
 
         # Aggiorna la label con il testo che include il percorso dell'immagine e le dimensioni
-        label_path.config(text=f"File selezionato: {file_path}\nDimensioni immagine: {img_width}x{img_height}")
+        label_path.config(text=f"File selezionato: {file_path}\n\nDimensioni immagine: {img_width}x{img_height}")
 
     else:
         label_path.config(text="Nessun file selezionato")
@@ -77,12 +78,14 @@ def show_images(original_image, compressed_image):
     # Mostra il canvas nella finestra
     canvas.get_tk_widget().pack()
 
+    
+
     # Imposta l'azione di chiusura sulla finestra principale
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
-    root.mainloop()
+    root.mainloop()    
 
-    
+
 
 def check_variables():    
     global entry_variable_f, entry_variable_d, F
@@ -165,14 +168,18 @@ def create_first_interface():
     root = tk.Tk()
     root.title("Seleziona file .bmp in toni di grigio")
 
+    # Utilizza un tema personalizzato da ttkthemes
+    style = ThemedStyle(root)
+    style.set_theme("plastik")
+
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
 
-    window_width = int(screen_width / 2)
-    window_height = int(screen_height / 2)
+    window_width = int(screen_width / 1.5)
+    window_height = int(screen_height / 1.5)
     root.geometry(f"{window_width}x{window_height}")
 
-    font_size = int(window_height / 30)
+    font_size = int(window_height / 45)
     custom_font = tkFont.Font(size=font_size)
 
     label_path = tk.Label(root, text="Nessun file selezionato", wraplength=300, font=custom_font)
