@@ -62,12 +62,12 @@ def show_images(original_image, compressed_image):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
 
     # Immagine originale
-    ax1.imshow(original_image, cmap="gray")
+    ax1.imshow(original_image, cmap="gray", interpolation = "nearest")
     ax1.set_title("Immagine Originale")
     ax1.axis("off")
 
     # Immagine compressa
-    ax2.imshow(compressed_image, cmap="gray")
+    ax2.imshow(compressed_image, cmap="gray", interpolation = "nearest", vmin = 0, vmax = 255)
     ax2.set_title("Immagine Compressa")
     ax2.axis("off")
 
@@ -206,7 +206,13 @@ def create_first_interface():
     compress_button = ttk.Button(root, text="Compress", command=flow, style="Material.TButton")
     compress_button.pack(pady=5)
 
+    def on_closing():
+        root.quit()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
+
+    
 
 def apply_dct2(blocks, d):
     # Lista per salvare i blocchi DCT2 quantizzati
@@ -277,7 +283,9 @@ def save_compressed_image(blocks_idct_rounded):
             for i in range(num_blocks_horizontal):
                 x0 = i * int(F)
                 y0 = j * int(F)
+                
                 block = blocks_idct_rounded.pop(0)
+                
                 compressed_image.paste(Image.fromarray(block), (x0, y0))          
 
         # Salva l'immagine compressa nel formato .bmp

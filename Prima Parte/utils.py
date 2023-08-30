@@ -38,18 +38,18 @@ def dct_created(input_vector):
 # Funzione per DCT2 creata
 def dct2_created(input_matrix):
     
-    m, n = input_matrix.shape
+    n, m = input_matrix.shape
 
     # Crezione della matrice 
-    dct2_result = np.zeros((m, n))
-
-    # DCT per ogni riga
-    for i in range(m):
-        dct2_result[i, :] = dct_created(input_matrix[i, :])
+    dct2_result = np.copy(input_matrix.astype('float64'))
 
     # DCT per ogni colonna
-    for j in range(n):
+    for j in range(m):
         dct2_result[:, j] = dct_created(dct2_result[:, j])
+
+    # DCT per ogni riga
+    for i in range(n):
+        dct2_result[i, :] = dct_created(dct2_result[i, :])    
 
     return dct2_result
 
