@@ -54,6 +54,7 @@ def show_images(original_image, compressed_image):
         compressed_image.close()    
     
         root.destroy()  # Chiudi la finestra principale
+        root.quit() 
 
 
     root = tk.Tk()
@@ -207,6 +208,7 @@ def create_first_interface():
     compress_button.pack(pady=5)
 
     def on_closing():
+        root.destroy()
         root.quit()      
 
     root.protocol("WM_DELETE_WINDOW", on_closing)
