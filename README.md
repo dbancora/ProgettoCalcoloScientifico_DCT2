@@ -11,3 +11,8 @@ Si noti che i tempi di esecuzione delle DCT2 personalizzata e di Scipy variano a
 
 
  ## Seconda parte
+La seconda parte del progetto consiste nel realizzare un'applicazione in grado di comprimere un immagine in formato _.bmp_ tramite la trasformata DTC2 e la sua inversa.  
+L'applicazione permette all'utente di personalizzare il processo di conversione grazie all'introduzione di parametri _F_ e _d_, utilizzati rispettivamente per la divisione in blocchi dell'immagine selezioanta e il parametro di quantizzazione.   
+L'applicazione consente di confrontare l'immagine originale con l'immagine compressa, permettendo all'utente di avere un'antemprima con lo scopo di mostrare le differenze tra le due immagini. 
+
+ 
