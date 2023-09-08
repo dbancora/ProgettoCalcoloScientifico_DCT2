@@ -15,27 +15,28 @@ global label_path, entry_variable_f, entry_variable_d, file_path
 
 file_path = None
 
+
 def flow():
     F, d, image_path = check_variables()
-    blocks = divide_image_into_blocks(image_path, F) 
-    blocks_dct_quantized = apply_dct2(blocks, d)   
+    blocks = divide_image_into_blocks(image_path, F)
+    blocks_dct_quantized = apply_dct2(blocks, d)
 
     for i, block_dct_quantized in enumerate(blocks_dct_quantized[:3]):
         print(f"Risultati della DCT2 quantizzata per blocco {i + 1}:\n{block_dct_quantized}\n")
-    
+
     blocks_idct_rounded = apply_idct2(blocks_dct_quantized)
-    save_compressed_image(blocks_idct_rounded)        
-    
+    save_compressed_image(blocks_idct_rounded)
+
     # Visualizza le immagini originale e compressa
     show_images(Image.open(file_path).convert('L'), Image.open("compressed_image.bmp"))
-        
+
 
 def browse_file():
     global file_path
     file_path = filedialog.askopenfilename(filetypes=[("Bitmap files", "*.bmp")])
     if file_path:
         label_path.config(text="File selezionato: " + file_path)
-        
+
         # Carichiamo l'immagine, la convertiamo in scala di grigi e calcoliamo le dimensioni 
         img = Image.open(file_path).convert('L')
         img_width, img_height = img.size
@@ -47,14 +48,14 @@ def browse_file():
     else:
         label_path.config(text="Nessun file selezionato")
 
-def show_images(original_image, compressed_image):
-    def on_closing():  
-        print("on closing...")    
-        original_image.close()
-        compressed_image.close()    
-    
-        root.destroy()  # Chiudi la finestra principale
 
+def show_images(original_image, compressed_image):
+    def on_closing():
+        print("on closing...")
+        original_image.close()
+        compressed_image.close()
+
+        root.destroy()  # Chiudi la finestra principale
 
     root = tk.Tk()
     root.title("Immagine originale e compressa")
@@ -62,12 +63,12 @@ def show_images(original_image, compressed_image):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
 
     # Immagine originale
-    ax1.imshow(original_image, cmap="gray", interpolation = "nearest")
+    ax1.imshow(original_image, cmap="gray", interpolation="nearest")
     ax1.set_title("Immagine Originale")
     ax1.axis("off")
 
     # Immagine compressa
-    ax2.imshow(compressed_image, cmap="gray", interpolation = "nearest", vmin = 0, vmax = 255)
+    ax2.imshow(compressed_image, cmap="gray", interpolation="nearest", vmin=0, vmax=255)
     ax2.set_title("Immagine Compressa")
     ax2.axis("off")
 
@@ -78,28 +79,25 @@ def show_images(original_image, compressed_image):
     # Mostra il canvas nella finestra
     canvas.get_tk_widget().pack()
 
-    
-
     # Imposta l'azione di chiusura sulla finestra principale
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
-    root.mainloop()    
+    root.mainloop()
 
 
-
-def check_variables():    
+def check_variables():
     global entry_variable_f, entry_variable_d, F
 
     compressed_image_path = "compressed_image.bmp"
 
-    try: 
+    try:
         # Verifica se esiste già un file "compressed_image.bmp"
         if os.path.exists(compressed_image_path):
             os.remove(compressed_image_path)  # Rimuovi il file esistente
             print("Rimossa l'immagine")
     except Exception as e:
         print("Errore durante la rimozione dell'immagine compressa:", str(e))
-    
+
     # Recupera i valori di F e d dalla label
     F = entry_variable_f.get()
     d = entry_variable_d.get()
@@ -120,7 +118,7 @@ def check_variables():
     if not is_integer(F):
         messagebox.showerror("Errore", "F deve essere un numero intero")
         return
-    
+
     if not is_integer(d):
         messagebox.showerror("Errore", "d deve essere un numero intero")
         return
@@ -151,16 +149,17 @@ def check_variables():
     except Exception as e:
         messagebox.showerror("Errore", f"Errore durante il recupero delle dimensioni dell'immagine: {str(e)}")
         return
-    
+
     # verifichiamo che il valore di d sia compreso tra 0 e 2F-2
-    if d > 2*F - 2 or d < 0:
+    if d > 2 * F - 2 or d < 0:
         messagebox.showerror("Errore", "Il valore di d deve essere compreso tra 0 e 2F-2.")
         return
 
     # If all checks pass, proceed with compression
     print("All test are ok.")
-    
+
     return F, d, file_path
+
 
 def create_first_interface():
     global label_path, entry_variable_f, entry_variable_d
@@ -201,18 +200,18 @@ def create_first_interface():
 
     entry_variable_d = tk.Entry(root, font=custom_font)
     entry_variable_d.pack(pady=5)
-    
+
     # Aggiungiamo il pulsante "Compress"
     compress_button = ttk.Button(root, text="Compress", command=flow, style="Material.TButton")
     compress_button.pack(pady=5)
 
     def on_closing():
-        root.quit()      
+        root.destroy()
+        root.quit()
 
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
 
-    
 
 def apply_dct2(blocks, d):
     # Lista per salvare i blocchi DCT2 quantizzati
@@ -233,6 +232,7 @@ def apply_dct2(blocks, d):
         blocks_dct_quantized.append(block_dct_quantized)
 
     return blocks_dct_quantized
+
 
 def apply_idct2(blocks_dct_quantized):
     # Lista per salvare i blocchi IDCT2 quantizzati e arrotondati
@@ -260,9 +260,9 @@ def apply_idct2(blocks_dct_quantized):
 
     return blocks_idct_rounded
 
-def save_compressed_image(blocks_idct_rounded):
 
-    compressed_image_path = "compressed_image.bmp" 
+def save_compressed_image(blocks_idct_rounded):
+    compressed_image_path = "compressed_image.bmp"
     compressed_image = None
 
     # Verifica se esiste già un file "compressed_image.bmp"
@@ -270,7 +270,7 @@ def save_compressed_image(blocks_idct_rounded):
         os.remove(compressed_image_path)  # Rimuovi il file esistente
         print("Rimossa l'immagine")
 
-    try:        
+    try:
 
         # Ricomponi l'immagine compressa utilizzando i blocchi compressi
         img_width, img_height = Image.open(file_path).size
@@ -283,18 +283,19 @@ def save_compressed_image(blocks_idct_rounded):
             for i in range(num_blocks_horizontal):
                 x0 = i * int(F)
                 y0 = j * int(F)
-                
-                block = blocks_idct_rounded.pop(0)
-                
-                compressed_image.paste(Image.fromarray(block), (x0, y0))          
 
-        # Salva l'immagine compressa nel formato .bmp
-        compressed_image.save(compressed_image_path) 
-        compressed_image.close()       
+                block = blocks_idct_rounded.pop(0)
+
+                compressed_image.paste(Image.fromarray(block), (x0, y0))
+
+                # Salva l'immagine compressa nel formato .bmp
+        compressed_image.save(compressed_image_path)
+        compressed_image.close()
 
         print("Immagine compressa salvata con successo.")
     except Exception as e:
         print("Errore durante il salvataggio dell'immagine compressa:", str(e))
+
 
 def divide_image_into_blocks(image_path, F):
     try:
@@ -328,10 +329,11 @@ def divide_image_into_blocks(image_path, F):
                 block.show()
             '''
             return blocks
-        
+
     except Exception as e:
         print("Errore durante l'elaborazione dell'immagine:", str(e))
         return blocks
+
 
 # per verificare se i valori F e d sono interi
 def is_integer(value):
@@ -340,6 +342,7 @@ def is_integer(value):
         return True
     except ValueError:
         return False
+
 
 def print_blocks(blocks):
     for i, block in enumerate(blocks):
