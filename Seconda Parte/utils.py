@@ -207,7 +207,7 @@ def create_first_interface():
     compress_button.pack(pady=5)
 
     def on_closing():
-        root.quit()
+        root.quit()      
 
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
