@@ -56,7 +56,7 @@ def show_images(original_image, compressed_image):
         compressed_image.close()
 
         root.destroy()  # Chiudi la finestra principale
-        root.quit()
+        root.quit()  # Interrompi il ciclo principale di Tkinter
 
     root = tk.Tk()
     root.title("Immagine originale e compressa")
@@ -207,8 +207,8 @@ def create_first_interface():
     compress_button.pack(pady=5)
 
     def on_closing():
-        root.destroy()
-        root.quit()
+        root.destroy() # Chiudi la finestra principale
+        root.quit()  # Interrompi il ciclo principale di Tkinter
 
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
